@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | AutoServe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js" defer></script>
+</head>
+<body class="light">
+    <main class="main-content">
+        <div class="flex items-center justify-between mb-8 no-print">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Business Reports</h1>
+                <p class="text-gray-500 dark:text-gray-400">Detailed analytics and performance metrics for your workshop.</p>
+            </div>
+            <button onclick="window.print()" class="bg-white border dark:border-gray-700 text-primary dark:text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print Report
+            </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card p-4 rounded-xl mb-8 shadow-sm flex flex-col md:flex-row gap-4 items-center no-print border dark:border-gray-800">
+             <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-400">From</span>
+                <input id="report-from" type="date" class="bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg px-4 py-2 text-sm">
+             </div>
+             <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-400">To</span>
+                <input id="report-to" type="date" class="bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg px-4 py-2 text-sm">
+             </div>
+             <button onclick="generateReports()" class="bg-accent text-white px-6 py-2 rounded-lg text-sm font-semibold ml-auto shadow-md shadow-accent/20 transition-all hover:bg-accent-hover">Generate Report</button>
+        </div>
+
+        <div class="only-print hidden block mb-10">
+            <h1 class="text-4xl font-bold text-primary">AutoServe Pro - Business Analytics Reports</h1>
+            <p class="text-gray-500">Generated on: <span id="print-date"></span></p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Revenue Report -->
+            <div class="card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col min-h-[400px]">
+                 <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-lg">Revenue Analysis</h3>
+                    <span class="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded">Financial</span>
+                 </div>
+                 <div class="flex-1 relative">
+                    <canvas id="chart-revenue"></canvas>
+                 </div>
+            </div>
+
+            <!-- Service Popularity -->
+            <div class="card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col min-h-[400px]">
+                 <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-lg">Popular Services</h3>
+                    <span class="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded">Operational</span>
+                 </div>
+                 <div class="flex-1 relative">
+                    <canvas id="chart-services"></canvas>
+                 </div>
+            </div>
+
+            <!-- Mechanic Performance -->
+            <div class="card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col min-h-[400px]">
+                 <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-lg">Mechanic Performance</h3>
+                    <span class="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded">HR</span>
+                 </div>
+                 <div class="flex-1 relative">
+                    <canvas id="chart-performance"></canvas>
+                 </div>
+            </div>
+
+            <!-- Inventory Summary -->
+            <div class="card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col min-h-[400px] overflow-hidden">
+                <h3 class="font-bold text-lg mb-6">Inventory Value Distribution</h3>
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-xs text-gray-400 uppercase font-bold border-b dark:border-gray-800">
+                            <tr>
+                                <th class="pb-2">Category</th>
+                                <th class="pb-2">Value</th>
+                                <th class="pb-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-report-list" class="divide-y dark:divide-gray-800">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let charts = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('report-to').value = today;
+            document.getElementById('print-date').innerText = new Date().toLocaleString();
+            
+            generateReports();
+        });
+
+        window.generateReports = () => {
+            const invoices = App.db.getData('invoices');
+            const jobcards = App.db.getData('jobcards');
+            const inventory = App.db.getData('inventory');
+            const staff = App.db.getData('staff').filter(s => s.role === 'Mechanic');
+
+            // 1. Revenue Report
+            const revenueCtx = document.getElementById('chart-revenue').getContext('2d');
+            if (charts.revenue) charts.revenue.destroy();
+            
+            // Group invoices by date
+            const revData = invoices.reduce((acc, i) => {
+                acc[i.date] = (acc[i.date] || 0) + i.total;
+                return acc;
+            }, {});
+            const sortedDates = Object.keys(revData).sort().slice(-7);
+
+            charts.revenue = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates.length ? sortedDates : ['No Data'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: sortedDates.length ? sortedDates.map(d => revData[d]) : [0],
+                        borderColor: '#1E3A5F',
+                        backgroundColor: 'rgba(30, 58, 95, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                }
+            });
+
+            // 2. Service Popularity
+            const servicesCtx = document.getElementById('chart-services').getContext('2d');
+            if (charts.services) charts.services.destroy();
+
+            const serviceCounts = jobcards.reduce((acc, j) => {
+                acc[j.serviceType] = (acc[j.serviceType] || 0) + 1;
+                return acc;
+            }, {});
+
+            charts.services = new Chart(servicesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(serviceCounts).length ? Object.keys(serviceCounts) : ['None'],
+                    datasets: [{
+                        data: Object.values(serviceCounts).length ? Object.values(serviceCounts) : [1],
+                        backgroundColor: ['#1E3A5F', '#F97316', '#10B981', '#6366F1', '#EC4899']
+                    }]
+                },
+                options: { plugins: { legend: { position: 'right' } } }
+            });
+
+            // 3. Mechanic Performance
+            const perfCtx = document.getElementById('chart-performance').getContext('2d');
+            if (charts.performance) charts.performance.destroy();
+
+            const mechJobs = staff.map(s => {
+                const count = jobcards.filter(j => j.mechanic === s.name && j.status === 'Completed').length;
+                return { name: s.name, count };
+            });
+
+            charts.performance = new Chart(perfCtx, {
+                type: 'bar',
+                data: {
+                    labels: mechJobs.length ? mechJobs.map(m => m.name) : ['None'],
+                    datasets: [{
+                        label: 'Jobs Completed',
+                        data: mechJobs.length ? mechJobs.map(m => m.count) : [0],
+                        backgroundColor: '#F97316'
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true, stepSize: 1 } } }
+            });
+
+            // 4. Inventory Table
+            const invList = document.getElementById('inventory-report-list');
+            const catValues = inventory.reduce((acc, p) => {
+                acc[p.category] = (acc[p.category] || 0) + (p.qty * p.price);
+                return acc;
+            }, {});
+
+            invList.innerHTML = '';
+            Object.keys(catValues).forEach(cat => {
+                const tr = document.createElement('tr');
+                tr.className = 'text-sm';
+                tr.innerHTML = `
+                    <td class="py-3 font-bold">${cat}</td>
+                    <td class="py-3 font-medium text-accent">$${catValues[cat].toLocaleString()}</td>
+                    <td class="py-3">
+                         <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded">Normal</span>
+                    </td>
+                `;
+                invList.appendChild(tr);
+            });
+        };
+    </script>
+</body>
+</html>

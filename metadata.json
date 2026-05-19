@@ -1,0 +1,6 @@
+{
+  "name": "AutoServe Pro",
+  "description": "A professional Vehicle Service Management System featuring customer registration, booking management, job cards, inventory tracking, and detailed reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

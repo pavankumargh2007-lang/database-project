@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AutoServe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js" defer></script>
+</head>
+<body class="light">
+    <main class="main-content">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
+                <p class="text-gray-500 dark:text-gray-400">Welcome back, here's what's happening today.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="customers.html" class="bg-white border dark:border-gray-700 text-primary dark:text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">New Customer</a>
+                <a href="vehicles.html?action=add" class="bg-white border dark:border-gray-700 text-primary dark:text-blue-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">Add Vehicle</a>
+                <a href="bookings.html" class="bg-accent text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-accent-hover transition-all shadow-md shadow-accent/20">+ New Booking</a>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-500">Total Customers</span>
+                    <div class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="19" cy="4" r="2"/></svg>
+                    </div>
+                </div>
+                <div>
+                    <h3 id="stat-customers" class="text-2xl font-bold">0</h3>
+                    <p class="text-xs text-green-500 mt-1 flex items-center gap-1 font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                        +12% this month
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-500">Active Bookings</span>
+                    <div class="p-2 bg-accent/10 text-accent rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                </div>
+                <div>
+                    <h3 id="stat-bookings" class="text-2xl font-bold">0</h3>
+                    <p class="text-xs text-gray-400 mt-1">Pending approval: 2</p>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-500">Pending Job Cards</span>
+                    <div class="p-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                </div>
+                <div>
+                    <h3 id="stat-jobcards" class="text-2xl font-bold">0</h3>
+                    <p class="text-xs text-orange-500 mt-1 uppercase font-bold tracking-wider">Attention needed</p>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-500">Today's Revenue</span>
+                    <div class="p-2 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                </div>
+                <div>
+                    <h3 id="stat-revenue" class="text-2xl font-bold">$0.00</h3>
+                    <p class="text-xs text-gray-400 mt-1">Goal: $2,500.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="lg:col-span-2 card p-6 rounded-xl shadow-sm flex flex-col">
+                <h3 class="text-lg font-bold mb-6">Revenue Analysis</h3>
+                <div class="flex-1 min-h-[300px]">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+            <div class="card p-6 rounded-xl shadow-sm flex flex-col">
+                <h3 class="text-lg font-bold mb-6">Vehicle Distribution</h3>
+                <div class="flex-1 flex items-center justify-center min-h-[300px]">
+                    <canvas id="vehiclePieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Bookings Table -->
+        <div class="card rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-800">
+            <div class="p-6 border-b dark:border-gray-800 flex items-center justify-between">
+                <h3 class="text-lg font-bold">Recent Bookings</h3>
+                <a href="bookings.html" class="text-sm text-primary font-semibold hover:underline">View All</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 dark:bg-gray-800/50 text-xs uppercase text-gray-500 font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Customer</th>
+                            <th class="px-6 py-4">Vehicle</th>
+                            <th class="px-6 py-4">Service Type</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-bookings-list" class="divide-y dark:divide-gray-800">
+                        <!-- Rows injected here -->
+                    </tbody>
+                </table>
+                <div id="no-bookings-message" class="p-12 text-center text-gray-500 hidden">
+                    <p>No bookings found. Start by adding a customer or booking!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load stats from App.db
+            const customers = App.db.getData('customers');
+            const bookings = App.db.getData('bookings');
+            const jobcards = App.db.getData('jobcards');
+            const invoices = App.db.getData('invoices');
+
+            // Update stats
+            document.getElementById('stat-customers').innerText = customers.length;
+            document.getElementById('stat-bookings').innerText = bookings.filter(b => b.status !== 'Completed' && b.status !== 'Cancelled').length;
+            document.getElementById('stat-jobcards').innerText = jobcards.filter(j => j.status !== 'Completed').length;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayRevenue = invoices
+                .filter(i => i.date === today && i.status === 'Paid')
+                .reduce((sum, i) => sum + i.total, 0);
+            document.getElementById('stat-revenue').innerText = `$${todayRevenue.toFixed(2)}`;
+
+            // Recent Bookings
+            const list = document.getElementById('recent-bookings-list');
+            const empty = document.getElementById('no-bookings-message');
+            const recent = bookings.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+            if (recent.length === 0) {
+                empty.classList.remove('hidden');
+            } else {
+                recent.forEach(b => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors';
+                    const customer = customers.find(c => c.id === b.customerId) || { name: 'Unknown' };
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium">${customer.name}</td>
+                        <td class="px-6 py-4">${b.vehicleModel} (${b.regNumber})</td>
+                        <td class="px-6 py-4">${b.serviceType}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${b.date}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs font-bold rounded-full ${getStatusClass(b.status)}">
+                                ${b.status}
+                            </span>
+                        </td>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+
+            function getStatusClass(status) {
+                switch(status) {
+                    case 'Confirmed': return 'bg-blue-100 text-blue-700';
+                    case 'Pending': return 'bg-gray-100 text-gray-700';
+                    case 'Completed': return 'bg-green-100 text-green-700';
+                    case 'Cancelled': return 'bg-red-100 text-red-700';
+                    default: return 'bg-orange-100 text-orange-700';
+                }
+            }
+
+            // Charts
+            const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctxRevenue, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [12000, 19000, 3000, 5000, 2000, todayRevenue > 0 ? todayRevenue : 15000],
+                        backgroundColor: '#1E3A5F',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const ctxVehicles = document.getElementById('vehiclePieChart').getContext('2d');
+            const carCount = customers.reduce((sum, c) => sum + (c.vehicles ? c.vehicles.filter(v => v.type === 'Car').length : 0), 0);
+            const bikeCount = customers.reduce((sum, c) => sum + (c.vehicles ? c.vehicles.filter(v => v.type === 'Bike').length : 0), 0);
+
+            new Chart(ctxVehicles, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cars', 'Bikes'],
+                    datasets: [{
+                        data: [carCount || 10, bikeCount || 5],
+                        backgroundColor: ['#1E3A5F', '#F97316']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

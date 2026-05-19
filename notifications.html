@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts | AutoServe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body class="light">
+    <main class="main-content">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Notification Center</h1>
+                <p class="text-gray-500 dark:text-gray-400">Automated alerts and manual customer communications.</p>
+            </div>
+            <button id="btn-compose" class="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md shadow-accent/20 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                Compose Alert
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Sidebar: Analytics -->
+            <div class="space-y-6">
+                <div class="card p-6 rounded-2xl">
+                    <h3 class="font-bold mb-4">Messaging Stats</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500">Sent Today</span>
+                            <span id="stat-sent" class="font-bold">0</span>
+                        </div>
+                        <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+                            <div class="bg-primary h-1.5 rounded-full" style="width: 70%"></div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500">Failed</span>
+                            <span id="stat-failed" class="font-bold text-red-500">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-2xl">
+                    <h3 class="font-bold mb-4">Quick Templates</h3>
+                    <div class="space-y-2">
+                        <button class="w-full text-left p-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors border dark:border-gray-800">Booking Confirmation</button>
+                        <button class="w-full text-left p-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors border dark:border-gray-800">Service Ready Alert</button>
+                        <button class="w-full text-left p-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors border dark:border-gray-800">Invoice Generated</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main: History -->
+            <div class="lg:col-span-2">
+                <div class="card rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-800">
+                    <div class="p-6 border-b dark:border-gray-800 flex items-center justify-between">
+                         <h3 class="font-bold">Communication Log</h3>
+                         <button onclick="clearHistory()" class="text-xs text-red-500 font-bold hover:underline">Clear History</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase font-bold text-gray-500">
+                                <tr>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Message Preview</th>
+                                    <th class="px-6 py-4">Type</th>
+                                    <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notification-list" class="divide-y dark:divide-gray-800">
+                                <!-- list -->
+                            </tbody>
+                        </table>
+                         <div id="no-alerts" class="p-20 text-center text-gray-400 hidden">
+                            No notifications sent yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compose Modal -->
+        <div id="compose-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+             <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+                <div class="p-6 border-b dark:border-gray-800 flex items-center justify-between">
+                    <h2 class="text-xl font-bold">Compose Notification</h2>
+                    <button class="close-modal text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                </div>
+                <form id="compose-form" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Select Customer *</label>
+                        <select id="notif-customer" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                            <!-- Injected -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Notification Type *</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="setNotifType('SMS')" id="btn-sms" class="py-2 rounded-lg border-2 border-primary bg-primary/10 font-bold text-sm">SMS Alert</button>
+                            <button type="button" onclick="setNotifType('Email')" id="btn-email" class="py-2 rounded-lg border-2 border-transparent bg-gray-100 dark:bg-gray-800 font-bold text-sm">Email Alert</button>
+                        </div>
+                        <input type="hidden" id="notif-type" value="SMS">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Message Body *</label>
+                        <textarea id="notif-msg" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800 min-h-[120px] text-sm" placeholder="Type your message here..."></textarea>
+                    </div>
+                    <div class="pt-4 flex justify-end gap-3">
+                         <button type="button" class="close-modal px-6 py-2 border dark:border-gray-700 rounded-lg">Cancel</button>
+                         <button type="submit" class="bg-accent text-white px-8 py-2 rounded-lg font-bold">Send Notification</button>
+                    </div>
+                </form>
+             </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             const list = document.getElementById('notification-list');
+             const emptyAlerts = document.getElementById('no-alerts');
+             const modal = document.getElementById('compose-modal');
+             const form = document.getElementById('compose-form');
+             const custSelect = document.getElementById('notif-customer');
+
+             function renderNotifications() {
+                const notifications = App.db.getData('notifications');
+                list.innerHTML = '';
+
+                if (notifications.length === 0) {
+                    emptyAlerts.classList.remove('hidden');
+                } else {
+                    emptyAlerts.classList.add('hidden');
+                    notifications.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(n => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors';
+                        tr.innerHTML = `
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-sm text-primary underline underline-offset-4 decoration-accent">${n.customerName}</p>
+                            </td>
+                            <td class="px-6 py-4 max-w-[300px]">
+                                <p class="text-xs truncate">${n.message}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase">${n.type}</span>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-gray-500">
+                                ${new Date(n.createdAt).toLocaleDateString()}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-xs font-bold ${n.status === 'Sent' ? 'text-green-500' : 'text-red-500'}">${n.status}</span>
+                            </td>
+                        `;
+                        list.appendChild(tr);
+                    });
+                }
+
+                document.getElementById('stat-sent').innerText = notifications.filter(n => n.status === 'Sent').length;
+                document.getElementById('stat-failed').innerText = notifications.filter(n => n.status === 'Failed').length;
+             }
+
+             function populateCustomers() {
+                const customers = App.db.getData('customers');
+                custSelect.innerHTML = '<option value="">-- Choose Customer --</option>';
+                customers.forEach(c => {
+                    custSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.phone})</option>`;
+                });
+             }
+
+             window.setNotifType = (type) => {
+                document.getElementById('notif-type').value = type;
+                if (type === 'SMS') {
+                    document.getElementById('btn-sms').classList.replace('border-transparent', 'border-primary');
+                    document.getElementById('btn-sms').classList.add('bg-primary/10');
+                    document.getElementById('btn-email').classList.replace('border-primary', 'border-transparent');
+                    document.getElementById('btn-email').classList.remove('bg-primary/10');
+                } else {
+                    document.getElementById('btn-email').classList.replace('border-transparent', 'border-primary');
+                    document.getElementById('btn-email').classList.add('bg-primary/10');
+                    document.getElementById('btn-sms').classList.replace('border-primary', 'border-transparent');
+                    document.getElementById('btn-sms').classList.remove('bg-primary/10');
+                }
+             };
+
+             form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!App.ui.validateForm('compose-form')) return;
+
+                const customers = App.db.getData('customers');
+                const c = customers.find(x => x.id === custSelect.value);
+                
+                // Simulated random failure (10% chance)
+                const status = Math.random() > 0.1 ? 'Sent' : 'Failed';
+                
+                const notifData = {
+                    customerId: custSelect.value,
+                    customerName: c.name,
+                    type: document.getElementById('notif-type').value,
+                    message: document.getElementById('notif-msg').value,
+                    status: status
+                };
+
+                App.db.create('notifications', notifData);
+                App.ui.showToast(status === 'Sent' ? 'Notification dispatched' : 'Delivery failed', status === 'Sent' ? 'success' : 'error');
+                modal.classList.add('hidden');
+                renderNotifications();
+             });
+
+             window.clearHistory = () => {
+                App.ui.confirmAction('Permanently clear all notification history?', () => {
+                    localStorage.setItem('notifications', '[]');
+                    renderNotifications();
+                });
+             };
+
+             document.getElementById('btn-compose').addEventListener('click', () => {
+                populateCustomers();
+                form.reset();
+                modal.classList.remove('hidden');
+            });
+            document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', () => modal.classList.add('hidden')));
+
+            renderNotifications();
+        });
+    </script>
+</body>
+</html>

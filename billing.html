@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing | AutoServe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body class="light">
+    <main class="main-content">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Billing & Invoices</h1>
+                <p class="text-gray-500 dark:text-gray-400">Manage payments, generate receipts, and track revenue.</p>
+            </div>
+        </div>
+
+        <div id="invoice-creation-section" class="mb-8 hidden">
+             <!-- Generating invoice form -->
+             <div class="card p-8 rounded-2xl shadow-xl border-t-4 border-accent">
+                <div class="flex justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold uppercase tracking-tighter text-primary">Generate Invoice</h2>
+                        <p class="text-sm text-gray-500 font-bold" id="bill-job-no">Job Card #0000</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pb-8 border-b dark:border-gray-800">
+                    <div>
+                        <h4 class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2">Customer Details</h4>
+                        <p id="bill-cust-name" class="font-bold text-lg">---</p>
+                        <p id="bill-veh-model" class="text-sm font-semibold text-accent">---</p>
+                        <p id="bill-veh-reg" class="text-xs font-mono uppercase font-bold text-gray-500">---</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Labour Charge ($) *</label>
+                            <input id="bill-labour" type="number" value="150" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800 text-lg font-bold">
+                        </div>
+                         <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Discount (%)</label>
+                            <input id="bill-discount" type="number" value="0" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                         <h4 class="text-xs text-gray-400 font-bold uppercase tracking-widest">Parts Used</h4>
+                         <button onclick="addPartToInvoce()" class="text-xs text-primary font-bold uppercase hover:underline">+ Add Part</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-xs text-gray-500 uppercase font-bold text-left border-b dark:border-gray-800">
+                                    <th class="py-2">Item Name</th>
+                                    <th class="py-2">Qty</th>
+                                    <th class="py-2">Unit Price</th>
+                                    <th class="py-2 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoice-parts-list">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-end gap-2 border-t dark:border-gray-800 pt-6">
+                    <div class="flex justify-between w-full max-w-[300px] text-sm">
+                        <span class="text-gray-500">Subtotal</span>
+                        <span id="bill-subtotal" class="font-bold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between w-full max-w-[300px] text-sm">
+                        <span class="text-gray-500">GST (18%)</span>
+                        <span id="bill-gst" class="font-bold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between w-full max-w-[300px] text-sm text-red-500">
+                        <span class="">Discount</span>
+                        <span id="bill-discount-amount" class="font-bold">-$0.00</span>
+                    </div>
+                    <div class="flex justify-between w-full max-w-[300px] text-xl font-bold mt-2 pt-2 border-t dark:border-gray-700">
+                        <span>Total Due</span>
+                        <span id="bill-total" class="text-accent underline underline-offset-4">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="mt-10 flex justify-end gap-3">
+                    <button onclick="cancelInvoice()" class="px-6 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">Cancel</button>
+                    <button onclick="saveAndPrintInvoice()" class="bg-accent text-white px-10 py-3 rounded-lg text-sm font-semibold shadow-md shadow-accent/20 transition-all hover:bg-accent-hover">Finalize & Print</button>
+                </div>
+             </div>
+        </div>
+
+        <div id="invoice-list-section">
+            <div class="card p-4 rounded-xl mb-6 shadow-sm flex gap-4">
+                 <input id="search-invoice" type="text" placeholder="Search Invoice No or Customer..." class="flex-1 p-2 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg">
+                 <button class="bg-gray-100 dark:bg-gray-800 px-6 rounded-lg text-sm font-bold">Filter</button>
+            </div>
+
+            <div class="card rounded-xl shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Invoice Detail</th>
+                            <th class="px-6 py-4">Customer Info</th>
+                            <th class="px-6 py-4">Total Amount</th>
+                            <th class="px-6 py-4 text-center">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoice-list-body" class="divide-y dark:divide-gray-800">
+                        <!-- rows -->
+                    </tbody>
+                </table>
+                 <div id="empty-invoices" class="p-12 text-center text-gray-500 hidden">
+                    No invoices generated yet.
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden Print Preview Container -->
+        <div id="print-preview" class="hidden fixed inset-0 bg-white z-[100] p-12 text-black overflow-y-auto">
+            <!-- Printable invoice here -->
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const listBody = document.getElementById('invoice-list-body');
+            const creationSection = document.getElementById('invoice-creation-section');
+            const listSection = document.getElementById('invoice-list-section');
+            const partsList = document.getElementById('invoice-parts-list');
+
+            let currentJobId = localStorage.getItem('pending_invoice_job_id');
+            let currentParts = [];
+
+            if (currentJobId) {
+                initInvoiceCreation(currentJobId);
+            }
+
+            function initInvoiceCreation(jobId) {
+                const job = App.db.getData('jobcards').find(j => j.id === jobId);
+                if (!job) return;
+
+                creationSection.classList.remove('hidden');
+                listSection.classList.add('hidden');
+
+                document.getElementById('bill-job-no').innerText = `Job Card #${job.jobNo}`;
+                document.getElementById('bill-cust-name').innerText = job.customerName;
+                document.getElementById('bill-veh-model').innerText = job.vehicleModel;
+                document.getElementById('bill-veh-reg').innerText = job.vehicleReg;
+
+                currentParts = job.parts || [];
+                renderInvoiceParts();
+                calculateTotals();
+            }
+
+            window.renderInvoiceParts = () => {
+                partsList.innerHTML = '';
+                currentParts.forEach((p, idx) => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b dark:border-gray-800 text-sm';
+                    row.innerHTML = `
+                        <td class="py-3 font-medium">${p.name}</td>
+                        <td class="py-3">${p.qty}</td>
+                        <td class="py-3">$${p.price.toFixed(2)}</td>
+                        <td class="py-3 text-right font-bold">$${(p.qty * p.price).toFixed(2)}</td>
+                    `;
+                    partsList.appendChild(row);
+                });
+            };
+
+            window.addPartToInvoce = () => {
+                const name = prompt('Part Name:');
+                const qty = parseInt(prompt('Quantity:', '1'));
+                const price = parseFloat(prompt('Price per unit:', '0'));
+                
+                if (name && qty > 0 && price >= 0) {
+                    currentParts.push({ name, qty, price });
+                    renderInvoiceParts();
+                    calculateTotals();
+                }
+            };
+
+            function calculateTotals() {
+                const labour = parseFloat(document.getElementById('bill-labour').value) || 0;
+                const partsTotal = currentParts.reduce((sum, p) => sum + (p.price * p.qty), 0);
+                const subtotal = labour + partsTotal;
+                const gst = subtotal * 0.18;
+                const discountPercent = parseFloat(document.getElementById('bill-discount').value) || 0;
+                const discountAmount = (subtotal + gst) * (discountPercent / 100);
+                const total = (subtotal + gst) - discountAmount;
+
+                document.getElementById('bill-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+                document.getElementById('bill-gst').innerText = `$${gst.toFixed(2)}`;
+                document.getElementById('bill-discount-amount').innerText = `-$${discountAmount.toFixed(2)}`;
+                document.getElementById('bill-total').innerText = `$${total.toFixed(2)}`;
+
+                return { subtotal, gst, discountAmount, total, labour };
+            }
+
+            document.getElementById('bill-labour').addEventListener('input', calculateTotals);
+            document.getElementById('bill-discount').addEventListener('input', calculateTotals);
+
+            window.saveAndPrintInvoice = () => {
+                const labourInput = document.getElementById('bill-labour');
+                if (!labourInput.value || parseFloat(labourInput.value) < 0) {
+                    App.ui.showToast('Please enter a valid labour charge', 'error');
+                    labourInput.classList.add('border-red-500');
+                    return;
+                }
+
+                const totals = calculateTotals();
+                const job = App.db.getData('jobcards').find(j => j.id === currentJobId);
+                
+                const invoiceData = {
+                    invoiceNo: 'INV' + Date.now().toString().slice(-6),
+                    jobId: currentJobId,
+                    customerName: job.customerName,
+                    vehicleReg: job.vehicleReg,
+                    parts: currentParts,
+                    labour: totals.labour,
+                    subtotal: totals.subtotal,
+                    gst: totals.gst,
+                    discount: totals.discountAmount,
+                    total: totals.total,
+                    date: new Date().toISOString().split('T')[0],
+                    status: 'Paid'
+                };
+
+                App.db.create('invoices', invoiceData);
+                App.db.update('jobcards', currentJobId, { status: 'Invoiced' });
+                
+                localStorage.removeItem('pending_invoice_job_id');
+                App.ui.showToast('Invoice Saved & Finalized!', 'success');
+                
+                generatePrintable(invoiceData);
+                window.print();
+                window.location.reload();
+            };
+
+            function generatePrintable(inv) {
+                 const preview = document.getElementById('print-preview');
+                 preview.innerHTML = `
+                    <div style="font-family: sans-serif; color: #000;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+                            <div>
+                                <h1 style="margin: 0; font-size: 32px; color: #1E3A5F;">AutoServe Pro</h1>
+                                <p style="margin: 5px 0; color: #666;">Modern Vehicle Service Station</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <h2 style="margin: 0; font-size: 24px;">INVOICE</h2>
+                                <p style="margin: 5px 0;">#${inv.invoiceNo}</p>
+                                <p style="margin: 5px 0;">Date: ${inv.date}</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 40px; display: flex; gap: 100px;">
+                            <div>
+                                <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; color: #999;">Billed To</h4>
+                                <p style="margin: 0; font-weight: bold; font-size: 18px;">${inv.customerName}</p>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; color: #999;">Vehicle Details</h4>
+                                <p style="margin: 0; font-weight: bold;">Reg No: <span style="font-family: monospace;">${inv.vehicleReg}</span></p>
+                            </div>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+                            <thead>
+                                <tr style="background: #f4f4f4; text-align: left;">
+                                    <th style="padding: 12px; font-size: 12px;">Description</th>
+                                    <th style="padding: 12px; font-size: 12px;">Qty</th>
+                                    <th style="padding: 12px; font-size: 12px;">Price</th>
+                                    <th style="padding: 12px; font-size: 12px; text-align: right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #eee;">Labour Charges / Service Pack</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #eee;">1</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #eee;">$${inv.labour.toFixed(2)}</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${inv.labour.toFixed(2)}</td>
+                                </tr>
+                                ${inv.parts.map(p => `
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${p.name}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${p.qty}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee;">$${p.price.toFixed(2)}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${(p.qty * p.price).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+
+                        <div style="margin-left: auto; width: 300px; text-align: right;">
+                            <p style="margin: 5px 0;">Subtotal: $${inv.subtotal.toFixed(2)}</p>
+                            <p style="margin: 5px 0;">GST (18%): $${inv.gst.toFixed(2)}</p>
+                            <p style="margin: 5px 0; color: red;">Discount: -$${inv.discount.toFixed(2)}</p>
+                            <hr>
+                            <h3 style="margin: 10px 0; font-size: 24px; color: #F97316;">Grand Total: $${inv.total.toFixed(2)}</h3>
+                        </div>
+
+                        <div style="margin-top: 100px; font-size: 12px; color: #999; text-align: center;">
+                            <p>Thank you for choosing AutoServe Pro!</p>
+                            <p>For support contact: support@autoserve.pro | +1 234 567 890</p>
+                        </div>
+                    </div>
+                 `;
+            }
+
+            window.renderInvoices = () => {
+                const invoices = App.db.getData('invoices');
+                const searchQuery = document.getElementById('search-invoice').value.toLowerCase();
+                
+                const filtered = invoices.filter(i => 
+                    i.invoiceNo.toLowerCase().includes(searchQuery) ||
+                    i.customerName.toLowerCase().includes(searchQuery)
+                );
+
+                listBody.innerHTML = '';
+                if (filtered.length === 0) {
+                    document.getElementById('empty-invoices').classList.remove('hidden');
+                } else {
+                    document.getElementById('empty-invoices').classList.add('hidden');
+                    filtered.forEach(i => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/30';
+                        tr.innerHTML = `
+                            <td class="px-6 py-4">
+                                <p class="font-bold">#${i.invoiceNo}</p>
+                                <p class="text-xs text-gray-400">${i.date}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium">${i.customerName}</p>
+                                <p class="text-xs font-mono font-bold uppercase">${i.vehicleReg}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-bold text-accent">$${i.total.toFixed(2)}</p>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">${i.status}</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="printOldInvoice('${i.invoiceNo}')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                </button>
+                            </td>
+                        `;
+                        listBody.appendChild(tr);
+                    });
+                }
+            };
+
+            window.printOldInvoice = (no) => {
+                const inv = App.db.getData('invoices').find(i => i.invoiceNo === no);
+                generatePrintable(inv);
+                window.print();
+            };
+
+            window.cancelInvoice = () => {
+                localStorage.removeItem('pending_invoice_job_id');
+                window.location.reload();
+            };
+
+            document.getElementById('search-invoice').addEventListener('input', renderInvoices);
+
+            renderInvoices();
+        });
+    </script>
+</body>
+</html>

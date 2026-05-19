@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookings | AutoServe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body class="light">
+    <main class="main-content">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Service Bookings</h1>
+                <p class="text-gray-500 dark:text-gray-400">Schedule and track vehicle maintenance appointments.</p>
+            </div>
+            <button id="btn-add-booking" class="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md shadow-accent/20 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                New Appointment
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card p-4 rounded-xl mb-6 shadow-sm flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input id="search-booking" type="text" placeholder="Search customer or vehicle..." class="w-full p-2 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg">
+            </div>
+            <select id="filter-status" class="bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg px-4 py-2">
+                <option value="all">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <input id="filter-date" type="date" class="bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg px-4 py-2">
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="card rounded-xl shadow-sm overflow-hidden min-h-[400px]">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 dark:bg-gray-800/50 text-xs uppercase text-gray-500 font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Booking Info</th>
+                            <th class="px-6 py-4">Customer & Vehicle</th>
+                            <th class="px-6 py-4">Service Details</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booking-list" class="divide-y dark:divide-gray-800">
+                        <!-- Bookings -->
+                    </tbody>
+                </table>
+                <div id="no-bookings" class="p-12 text-center text-gray-500 hidden">
+                    No bookings found.
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Modal -->
+        <div id="booking-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+                <div class="p-6 border-b dark:border-gray-800 flex items-center justify-between">
+                    <h2 id="booking-modal-title" class="text-xl font-bold">Schedule Appointment</h2>
+                    <button id="close-modal" class="text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <form id="booking-form" class="p-6">
+                    <input type="hidden" id="booking-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Select Customer *</label>
+                            <select id="book-customer" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                                <option value="">-- Choose Customer --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Select Vehicle *</label>
+                            <select id="book-vehicle" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                                <option value="">-- Choose Vehicle --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Service Type *</label>
+                            <select id="book-service" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                                <option value="General Service">General Service</option>
+                                <option value="Oil Change">Oil Change</option>
+                                <option value="Brake Repair">Brake Repair</option>
+                                <option value="Engine Check">Engine Check</option>
+                                <option value="Tyre Change">Tyre Change</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Preferred Mechanic</label>
+                            <select id="book-mechanic" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                                <option value="Unassigned">Unassigned</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Date *</label>
+                            <input type="date" id="book-date" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Time *</label>
+                            <input type="time" id="book-time" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-1">Notes</label>
+                        <textarea id="book-notes" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800 h-24" placeholder="Additional requirements..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3">
+                        <button type="button" class="btn-cancel px-6 py-2 border dark:border-gray-700 rounded-lg">Cancel</button>
+                        <button type="submit" class="bg-accent text-white px-8 py-2 rounded-lg font-medium shadow-lg shadow-accent/20">Confirm Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const list = document.getElementById('booking-list');
+            const customerSelect = document.getElementById('book-customer');
+            const vehicleSelect = document.getElementById('book-vehicle');
+            const mechanicSelect = document.getElementById('book-mechanic');
+            const modal = document.getElementById('booking-modal');
+            const form = document.getElementById('booking-form');
+
+            function populateForm() {
+                const customers = App.db.getData('customers');
+                const staff = App.db.getData('staff').filter(s => s.role === 'Mechanic' && s.status === 'Active');
+                
+                customerSelect.innerHTML = '<option value="">-- Choose Customer --</option>';
+                customers.forEach(c => {
+                    customerSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.phone})</option>`;
+                });
+
+                mechanicSelect.innerHTML = '<option value="Unassigned">Unassigned</option>';
+                staff.forEach(s => {
+                    mechanicSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.specialization})</option>`;
+                });
+            }
+
+            customerSelect.addEventListener('change', () => {
+                const customers = App.db.getData('customers');
+                const c = customers.find(x => x.id === customerSelect.value);
+                vehicleSelect.innerHTML = '<option value="">-- Choose Vehicle --</option>';
+                if (c) {
+                    c.vehicles.forEach(v => {
+                        vehicleSelect.innerHTML += `<option value="${v.reg}">${v.brand} ${v.model} (${v.reg})</option>`;
+                    });
+                }
+            });
+
+            function renderBookings() {
+                const bookings = App.db.getData('bookings');
+                const customers = App.db.getData('customers');
+                const searchQuery = document.getElementById('search-booking').value.toLowerCase();
+                const statusFilter = document.getElementById('filter-status').value;
+                const dateFilter = document.getElementById('filter-date').value;
+
+                const filtered = bookings.filter(b => {
+                    const c = customers.find(x => x.id === b.customerId) || {};
+                    const matchesSearch = (c.name || '').toLowerCase().includes(searchQuery) || 
+                                        b.vehicleModel.toLowerCase().includes(searchQuery) ||
+                                        b.regNumber.toLowerCase().includes(searchQuery);
+                    const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+                    const matchesDate = !dateFilter || b.date === dateFilter;
+                    return matchesSearch && matchesStatus && matchesDate;
+                });
+
+                list.innerHTML = '';
+                if (filtered.length === 0) {
+                    document.getElementById('no-bookings').classList.remove('hidden');
+                } else {
+                    document.getElementById('no-bookings').classList.add('hidden');
+                    filtered.forEach(b => {
+                        const c = customers.find(x => x.id === b.customerId) || { name: 'Deleted Customer' };
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/30';
+                        tr.innerHTML = `
+                            <td class="px-6 py-4">
+                                <p class="font-bold">#${b.id.slice(-5).toUpperCase()}</p>
+                                <p class="text-xs text-gray-500">${b.date} at ${b.time}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium">${c.name}</p>
+                                <p class="text-xs text-accent font-bold uppercase">${b.vehicleModel} - ${b.regNumber}</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <p class="font-semibold">${b.serviceType}</p>
+                                <p class="text-xs text-gray-500">Mech: ${b.mechanicName || 'Not Assigned'}</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <select onchange="updateBookingStatus('${b.id}', this.value)" class="text-xs font-bold rounded-full px-3 py-1 ${getStatusClass(b.status)}">
+                                    <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Confirmed" ${b.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="In Progress" ${b.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="Completed" ${b.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="Cancelled" ${b.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button onclick="deleteBooking('${b.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                </button>
+                                ${b.status === 'Confirmed' ? `<button onclick="generateJobCard('${b.id}')" class="ml-2 text-primary font-bold text-xs uppercase hover:underline">Create Job Card</button>` : ''}
+                            </td>
+                        `;
+                        list.appendChild(tr);
+                    });
+                }
+            }
+
+            function getStatusClass(status) {
+                switch(status) {
+                    case 'Confirmed': return 'bg-blue-100 text-blue-700';
+                    case 'Pending': return 'bg-gray-100 text-gray-700';
+                    case 'In Progress': return 'bg-yellow-100 text-yellow-700';
+                    case 'Completed': return 'bg-green-100 text-green-700';
+                    case 'Cancelled': return 'bg-red-100 text-red-700';
+                    default: return 'bg-gray-100';
+                }
+            }
+
+            window.updateBookingStatus = (id, status) => {
+                App.db.update('bookings', id, { status });
+                App.ui.showToast(`Booking status updated to ${status}`, 'info');
+                
+                // Auto trigger notification
+                if (status === 'Confirmed') {
+                    const b = App.db.getData('bookings').find(x => x.id === id);
+                    const c = App.db.getData('customers').find(x => x.id === b.customerId);
+                    App.db.create('notifications', {
+                        customerId: b.customerId,
+                        customerName: c.name,
+                        message: `Hi ${c.name}, your service booking for ${b.regNumber} on ${b.date} is CONFIRMED.`,
+                        type: 'SMS',
+                        status: 'Sent'
+                    });
+                }
+                renderBookings();
+            };
+
+            window.deleteBooking = (id) => {
+                App.ui.confirmAction('Delete this booking?', () => {
+                    App.db.delete('bookings', id);
+                    App.ui.showToast('Booking deleted');
+                    renderBookings();
+                });
+            };
+
+            window.generateJobCard = (id) => {
+                const b = App.db.getData('bookings').find(x => x.id === id);
+                const c = App.db.getData('customers').find(x => x.id === b.customerId);
+                
+                const jobCard = {
+                    bookingId: b.id,
+                    jobNo: 'JC' + Date.now().toString().slice(-6),
+                    customerName: c.name,
+                    vehicleReg: b.regNumber,
+                    vehicleModel: b.vehicleModel,
+                    vehicleYear: b.vehicleYear || '',
+                    vehicleColor: b.vehicleColor || '',
+                    mechanic: b.mechanicName || 'Assigning...',
+                    serviceType: b.serviceType,
+                    status: 'Open',
+                    parts: [],
+                    labourCharge: 0,
+                    notes: b.notes
+                };
+                
+                App.db.create('jobcards', jobCard);
+                App.db.update('bookings', id, { status: 'In Progress' });
+                App.ui.showToast('Job Card generated successfully!', 'success');
+                window.location.href = 'jobcards.html';
+            };
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!App.ui.validateForm('booking-form')) return;
+
+                const customers = App.db.getData('customers');
+                const c = customers.find(x => x.id === customerSelect.value);
+                const v = c.vehicles.find(x => x.reg === vehicleSelect.value);
+                
+                const bookingData = {
+                    customerId: customerSelect.value,
+                    customerName: c.name,
+                    regNumber: vehicleSelect.value,
+                    vehicleModel: v ? `${v.brand} ${v.model}` : 'Generic',
+                    vehicleYear: v ? v.year : '',
+                    vehicleColor: v ? v.color : '',
+                    serviceType: document.getElementById('book-service').value,
+                    mechanicId: mechanicSelect.value,
+                    mechanicName: mechanicSelect.options[mechanicSelect.selectedIndex].text.split('(')[0].trim(),
+                    date: document.getElementById('book-date').value,
+                    time: document.getElementById('book-time').value,
+                    notes: document.getElementById('book-notes').value,
+                    status: 'Confirmed'
+                };
+
+                App.db.create('bookings', bookingData);
+                App.ui.showToast('Booking Scheduled', 'success');
+                modal.classList.add('hidden');
+                renderBookings();
+            });
+
+            document.getElementById('btn-add-booking').addEventListener('click', () => {
+                populateForm();
+                modal.classList.remove('hidden');
+            });
+            document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+            document.querySelector('.btn-cancel').addEventListener('click', () => modal.classList.add('hidden'));
+            document.getElementById('search-booking').addEventListener('input', renderBookings);
+            document.getElementById('filter-status').addEventListener('change', renderBookings);
+            document.getElementById('filter-date').addEventListener('change', renderBookings);
+
+            renderBookings();
+        });
+    </script>
+</body>
+</html>

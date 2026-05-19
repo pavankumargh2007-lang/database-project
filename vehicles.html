@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles | AutoServe Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body class="light">
+    <main class="main-content">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Vehicle Management</h1>
+                <p class="text-gray-500 dark:text-gray-400">View and manage the fleet of vehicles registered in your system.</p>
+            </div>
+            <button id="btn-add-vehicle" class="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md shadow-accent/20 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Add Vehicle
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card p-4 rounded-xl mb-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row gap-4 items-center">
+            <div class="relative flex-1">
+                <input id="search-vehicle" type="text" placeholder="Search by brand, model or registration..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary">
+                <svg class="absolute left-3 top-2.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+            <select id="filter-type" class="bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary">
+                <option value="all">All Types</option>
+                <option value="Car">Car</option>
+                <option value="Bike">Bike</option>
+            </select>
+        </div>
+
+        <!-- Vehicles Grid -->
+        <div id="vehicle-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Injected -->
+        </div>
+
+        <div id="empty-state" class="p-12 text-center text-gray-500 hidden card rounded-xl">
+            <p>No vehicles found.</p>
+        </div>
+
+        <!-- Add/Edit Vehicle Modal -->
+        <div id="vehicle-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+                <div class="p-6 border-b dark:border-gray-800 flex items-center justify-between">
+                    <h2 id="modal-title" class="text-xl font-bold">Add New Vehicle</h2>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <form id="vehicle-form" class="p-6">
+                    <input type="hidden" id="edit-veh-reg">
+                    <input type="hidden" id="edit-cust-id">
+                    
+                    <div class="space-y-4">
+                        <div id="owner-select-container">
+                            <label class="block text-sm font-medium mb-1">Select Owner *</label>
+                            <select id="veh-owner" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Type</label>
+                                <select id="veh-type" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800">
+                                    <option value="Car">Car</option>
+                                    <option value="Bike">Bike</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Reg. Number *</label>
+                                <input type="text" id="veh-reg" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800 uppercase" placeholder="ABC-123">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Brand</label>
+                                <input type="text" id="veh-brand" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800" placeholder="e.g. Toyota">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Model</label>
+                                <input type="text" id="veh-model" required class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800" placeholder="e.g. Corolla">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Year</label>
+                                <input type="number" id="veh-year" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800" placeholder="2022">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Color</label>
+                                <input type="text" id="veh-color" class="w-full p-2 border dark:border-gray-700 rounded-lg dark:bg-gray-800" placeholder="White">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-end gap-3">
+                        <button type="button" id="cancel-form" class="px-6 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Cancel</button>
+                        <button type="submit" class="bg-accent text-white px-8 py-2 rounded-lg font-medium shadow-md shadow-accent/20 transition-all hover:bg-accent-hover">Save Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('vehicle-grid');
+            const emptyState = document.getElementById('empty-state');
+            const modal = document.getElementById('vehicle-modal');
+            const form = document.getElementById('vehicle-form');
+            const ownerSelect = document.getElementById('veh-owner');
+            const searchInput = document.getElementById('search-vehicle');
+            const typeFilter = document.getElementById('filter-type');
+
+            function renderVehicles() {
+                const customers = App.db.getData('customers');
+                const searchQuery = searchInput.value.toLowerCase();
+                const filterType = typeFilter.value;
+
+                let allVehicles = [];
+                customers.forEach(c => {
+                    if (c.vehicles) {
+                        c.vehicles.forEach(v => {
+                            allVehicles.push({ ...v, ownerName: c.name, ownerId: c.id });
+                        });
+                    }
+                });
+
+                const filtered = allVehicles.filter(v => {
+                    const brand = (v.brand || '').toLowerCase();
+                    const model = (v.model || '').toLowerCase();
+                    const reg = (v.reg || '').toLowerCase();
+                    
+                    const matchesSearch = brand.includes(searchQuery) || 
+                                        model.includes(searchQuery) || 
+                                        reg.includes(searchQuery);
+                    const matchesType = filterType === 'all' || v.type === filterType;
+                    return matchesSearch && matchesType;
+                });
+
+                grid.innerHTML = '';
+                if (filtered.length === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    filtered.forEach(v => {
+                        const card = document.createElement('div');
+                        card.className = 'card p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all group';
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10M2 11l3-4h13l3 4M2 11v5h20v-5H2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="editVehicle('${v.ownerId}', '${v.reg}')" class="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                    </button>
+                                    <button onclick="deleteVehicle('${v.ownerId}', '${v.reg}')" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <span class="text-[10px] bg-accent/10 text-accent px-2 py-1 rounded-full uppercase font-bold tracking-wider">${v.type}</span>
+                                <h3 class="text-xl font-bold mt-2">${v.brand} ${v.model}</h3>
+                                <code class="text-sm border dark:border-gray-700 px-2 py-0.5 rounded bg-gray-50 dark:bg-gray-800 font-bold mt-1 inline-block uppercase">${v.reg}</code>
+                            </div>
+                            <div class="pt-4 border-t dark:border-gray-800 flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-tight">Owner</p>
+                                    <p class="text-sm font-semibold">${v.ownerName}</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-500 uppercase tracking-tight">Year</p>
+                                    <p class="text-sm font-semibold">${v.year || 'N/A'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-500 uppercase tracking-tight">Color</p>
+                                    <p class="text-sm font-semibold">${v.color || 'N/A'}</p>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
+            }
+
+            function populateOwners() {
+                const customers = App.db.getData('customers');
+                ownerSelect.innerHTML = '<option value="">-- Select Customer --</option>';
+                customers.forEach(c => {
+                    ownerSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.phone})</option>`;
+                });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!App.ui.validateForm('vehicle-form')) return;
+
+                const originalReg = document.getElementById('edit-veh-reg').value;
+                const custId = ownerSelect.value || document.getElementById('edit-cust-id').value;
+                
+                const vehicleData = {
+                    type: document.getElementById('veh-type').value,
+                    brand: document.getElementById('veh-brand').value,
+                    model: document.getElementById('veh-model').value,
+                    reg: document.getElementById('veh-reg').value,
+                    year: document.getElementById('veh-year').value,
+                    color: document.getElementById('veh-color').value,
+                };
+
+                const customers = App.db.getData('customers');
+                const customerIndex = customers.findIndex(c => c.id === custId);
+                
+                if (customerIndex !== -1) {
+                    if (originalReg) {
+                        // Update existing
+                        const vehIndex = customers[customerIndex].vehicles.findIndex(v => v.reg === originalReg);
+                        if (vehIndex !== -1) {
+                            customers[customerIndex].vehicles[vehIndex] = vehicleData;
+                        }
+                    } else {
+                        // Add new
+                        if (!customers[customerIndex].vehicles) customers[customerIndex].vehicles = [];
+                        customers[customerIndex].vehicles.push(vehicleData);
+                    }
+                    App.db.saveData('customers', customers);
+                    App.ui.showToast('Vehicle saved successfully', 'success');
+                }
+
+                modal.classList.add('hidden');
+                form.reset();
+                renderVehicles();
+            });
+
+            window.editVehicle = (ownerId, reg) => {
+                const customers = App.db.getData('customers');
+                const c = customers.find(x => x.id === ownerId);
+                if (c && c.vehicles) {
+                    const v = c.vehicles.find(veh => veh.reg === reg);
+                    if (v) {
+                        document.getElementById('modal-title').innerText = 'Edit Vehicle';
+                        document.getElementById('edit-veh-reg').value = v.reg;
+                        document.getElementById('edit-cust-id').value = ownerId;
+                        
+                        ownerSelect.value = ownerId;
+                        document.getElementById('owner-select-container').classList.add('hidden'); // Cannot change owner while editing vehicle detail here (simplification)
+                        
+                        document.getElementById('veh-type').value = v.type || 'Car';
+                        document.getElementById('veh-brand').value = v.brand || '';
+                        document.getElementById('veh-model').value = v.model || '';
+                        document.getElementById('veh-reg').value = v.reg || '';
+                        document.getElementById('veh-year').value = v.year || '';
+                        document.getElementById('veh-color').value = v.color || '';
+                        
+                        modal.classList.remove('hidden');
+                    }
+                }
+            };
+
+            window.deleteVehicle = (ownerId, reg) => {
+                App.ui.confirmAction('Remove this vehicle entry?', () => {
+                    const customers = App.db.getData('customers');
+                    const cIdx = customers.findIndex(x => x.id === ownerId);
+                    if (cIdx !== -1) {
+                        customers[cIdx].vehicles = customers[cIdx].vehicles.filter(v => v.reg !== reg);
+                        App.db.saveData('customers', customers);
+                        App.ui.showToast('Vehicle removed');
+                        renderVehicles();
+                    }
+                });
+            };
+
+            document.getElementById('btn-add-vehicle').addEventListener('click', () => {
+                document.getElementById('modal-title').innerText = 'Add New Vehicle';
+                document.getElementById('edit-veh-reg').value = '';
+                document.getElementById('edit-cust-id').value = '';
+                document.getElementById('owner-select-container').classList.remove('hidden');
+                form.reset();
+                populateOwners();
+                modal.classList.remove('hidden');
+            });
+
+            document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+            document.getElementById('cancel-form').addEventListener('click', () => modal.classList.add('hidden'));
+            searchInput.addEventListener('input', renderVehicles);
+            typeFilter.addEventListener('change', renderVehicles);
+
+            renderVehicles();
+
+            // Handle action=add from dashboard
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'add') {
+                document.getElementById('btn-add-vehicle').click();
+            }
+        });
+    </script>
+</body>
+</html>
